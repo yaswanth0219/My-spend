@@ -810,3 +810,77 @@ nav {
     }
 
 }
+/* ==========================================
+   AUTH SCREEN
+========================================== */
+
+.auth-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0d0f14;
+    z-index: 9999;
+}
+
+.auth-card {
+    width: min(420px, 90%);
+    padding: 40px;
+    background: #13161f;
+    border: 1px solid #252b37;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.auth-card .logo {
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.auth-card h2 {
+    margin-bottom: 8px;
+}
+
+.auth-card p {
+    color: #8d94a5;
+}
+
+#authForm {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 25px;
+}
+
+#authForm input {
+    padding: 14px;
+    border: 1px solid #252b37;
+    border-radius: 10px;
+    background: #0d0f14;
+    color: white;
+    font-size: 15px;
+}
+
+#authButton {
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #62e6a7;
+    color: #0d0f14;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.auth-toggle {
+    margin-top: 20px;
+    border: none;
+    background: transparent;
+    color: #62e6a7;
+    cursor: pointer;
+}
+
+.auth-error {
+    color: #ff6b6b !important;
+    min-height: 20px;
+}
