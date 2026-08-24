@@ -49,10 +49,9 @@ const confirmDelete = document.getElementById("confirmDelete");
 // DATA
 // ==========================================
 
-let purchases = JSON.parse(localStorage.getItem("mySpendPurchases")) || [];
+let purchases = [];
 
 let purchaseToDelete = null;
-
 
 // ==========================================
 // DEFAULT DATE
@@ -82,21 +81,13 @@ function formatCurrency(amount) {
 // SAVE DATA
 // ==========================================
 
-function savePurchases() {
-
-    localStorage.setItem(
-        "mySpendPurchases",
-        JSON.stringify(purchases)
-    );
-
-}
 
 
 // ==========================================
 // ADD PURCHASE
 // ==========================================
 
-purchaseForm.addEventListener("submit", function(event) {
+purchaseForm.addEventListener("submit", async function(event) {
 
     event.preventDefault();
 
@@ -157,12 +148,22 @@ purchaseForm.addEventListener("submit", function(event) {
 
     // Add purchase
 
-    purchases.push(purchase);
+    const { error } = await supabaseClient
+    .from("expenses")
+    .insert({
+        title: productName,
+        amount: amount,
+        category: category,
+        date: date
+    });
 
+if (error) {
+    console.error(error);
+    errorMessage.textContent = "Failed to save purchase.";
+    return;
+}
 
-    // Save
-
-    savePurchases();
+await loadPurchases();
 
 
     // Reset form
@@ -513,23 +514,29 @@ cancelDelete.addEventListener(
 
 confirmDelete.addEventListener(
     "click",
-    function() {
+    async function() {
 
         if (purchaseToDelete === null) {
             return;
         }
 
 
-        purchases = purchases.filter(
-            purchase => purchase.id !== purchaseToDelete
-        );
+        const { error } = await supabaseClient
+    .from("expenses")
+    .delete()
+    .eq("id", purchaseToDelete);
 
+if (error) {
 
-        savePurchases();
+    console.error("Delete error:", error);
 
-        updateDashboard();
+    return;
 
-        closeDeleteModal();
+}
+
+await loadPurchases();
+
+closeDeleteModal();
 
     }
 );
@@ -581,7 +588,49 @@ function escapeHTML(text) {
 
 
 // ==========================================
+// ==========================================
+// LOAD PURCHASES FROM SUPABASE
+// ==========================================
+
+async function loadPurchases() {
+
+    const { data, error } = await supabaseClient
+        .from("expenses")
+        .select("*")
+        .order("date", { ascending: false });
+
+    if (error) {
+
+        console.error("Supabase error:", error);
+
+        errorMessage.textContent =
+            "Could not load purchases.";
+
+        return;
+
+    }
+
+    purchases = data.map(purchase => ({
+
+        id: purchase.id,
+
+        productName: purchase.title,
+
+        amount: Number(purchase.amount),
+
+        category: purchase.category,
+
+        date: purchase.date
+
+    }));
+
+    updateDashboard();
+
+}
+
+
+// ==========================================
 // INITIAL LOAD
 // ==========================================
 
-updateDashboard();
+loadPurchases();
