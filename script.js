@@ -266,14 +266,30 @@ purchaseForm.addEventListener("submit", async function(event) {
 
     // Add purchase
 
-    const { error } = await supabaseClient
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+if (!user) {
+    errorMessage.textContent = "You are not logged in.";
+    return;
+}
+
+const { error } = await supabaseClient
     .from("expenses")
     .insert({
+        user_id: user.id,
         title: productName,
         amount: amount,
         category: category,
         date: date
     });
+
+if (error) {
+    console.error("Save error:", error);
+    errorMessage.textContent = "Failed to save purchase: " + error.message;
+    return;
+}
+
+await loadPurchases();
 
 if (error) {
     console.error(error);
@@ -781,33 +797,3 @@ async function checkAuth() {
 
 checkAuth();
 
-
-// ==========================================
-// INITIAL LOAD
-// ==========================================
-
-// ==========================================
-// CHECK LOGIN
-// ==========================================
-
-async function checkAuth() {
-
-    const {
-        data: { session }
-    } = await supabaseClient.auth.getSession();
-
-    if (session) {
-
-        showDashboard();
-
-        await loadPurchases();
-
-    } else {
-
-        showAuth();
-
-    }
-
-}
-
-checkAuth();
