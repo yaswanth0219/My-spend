@@ -11,6 +11,124 @@ const supabaseClient = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
+// ==========================================
+// AUTHENTICATION
+// ==========================================
+
+const authScreen = document.getElementById("authScreen");
+const authForm = document.getElementById("authForm");
+const authEmail = document.getElementById("authEmail");
+const authPassword = document.getElementById("authPassword");
+const authButton = document.getElementById("authButton");
+const authTitle = document.getElementById("authTitle");
+const authSubtitle = document.getElementById("authSubtitle");
+const authError = document.getElementById("authError");
+const toggleAuth = document.getElementById("toggleAuth");
+
+let isSignUpMode = false;
+
+
+// Hide/show dashboard
+function showDashboard() {
+    authScreen.style.display = "none";
+    document.querySelector(".app").style.display = "flex";
+}
+
+function showAuth() {
+    authScreen.style.display = "flex";
+    document.querySelector(".app").style.display = "none";
+}
+
+
+// Toggle Sign In / Sign Up
+toggleAuth.addEventListener("click", function () {
+
+    isSignUpMode = !isSignUpMode;
+
+    authError.textContent = "";
+
+    if (isSignUpMode) {
+
+        authTitle.textContent = "Create your account";
+
+        authSubtitle.textContent =
+            "Sign up to start tracking your expenses.";
+
+        authButton.textContent = "Sign Up";
+
+        toggleAuth.textContent =
+            "Already have an account? Sign In";
+
+    } else {
+
+        authTitle.textContent = "Welcome to MySpend";
+
+        authSubtitle.textContent =
+            "Sign in to manage your personal expenses.";
+
+        authButton.textContent = "Sign In";
+
+        toggleAuth.textContent =
+            "Don't have an account? Sign Up";
+    }
+
+});
+
+
+// Sign In / Sign Up
+authForm.addEventListener("submit", async function (event) {
+
+    event.preventDefault();
+
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+
+    authError.textContent = "";
+    authButton.disabled = true;
+
+    let result;
+
+    if (isSignUpMode) {
+
+        result = await supabaseClient.auth.signUp({
+            email: email,
+            password: password
+        });
+
+    } else {
+
+        result = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+    }
+
+    authButton.disabled = false;
+
+    if (result.error) {
+
+        authError.textContent = result.error.message;
+
+        return;
+    }
+
+    // Email confirmation may be required
+    if (isSignUpMode && !result.data.session) {
+
+        authError.style.color = "#62e6a7";
+
+        authError.textContent =
+            "Account created! Check your email to confirm your account.";
+
+        return;
+    }
+
+    showDashboard();
+
+    await loadPurchases();
+
+});
 
 const purchaseForm = document.getElementById("purchaseForm");
 
@@ -633,4 +751,28 @@ async function loadPurchases() {
 // INITIAL LOAD
 // ==========================================
 
-loadPurchases();
+// ==========================================
+// CHECK LOGIN
+// ==========================================
+
+async function checkAuth() {
+
+    const {
+        data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (session) {
+
+        showDashboard();
+
+        await loadPurchases();
+
+    } else {
+
+        showAuth();
+
+    }
+
+}
+
+checkAuth();
