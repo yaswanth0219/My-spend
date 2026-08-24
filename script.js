@@ -710,6 +710,10 @@ function escapeHTML(text) {
 // LOAD PURCHASES FROM SUPABASE
 // ==========================================
 
+// ==========================================
+// LOAD PURCHASES FROM SUPABASE
+// ==========================================
+
 async function loadPurchases() {
 
     const {
@@ -752,40 +756,6 @@ async function loadPurchases() {
     }));
 
     updateDashboard();
-}
-
-    const { data, error } = await supabaseClient
-        .from("expenses")
-        .select("*")
-        .order("date", { ascending: false });
-
-    if (error) {
-
-        console.error("Supabase error:", error);
-
-        errorMessage.textContent =
-            "Could not load purchases.";
-
-        return;
-
-    }
-
-    purchases = data.map(purchase => ({
-
-        id: purchase.id,
-
-        productName: purchase.title,
-
-        amount: Number(purchase.amount),
-
-        category: purchase.category,
-
-        date: purchase.date
-
-    }));
-
-    updateDashboard();
-
 }
 
 
