@@ -4,6 +4,13 @@
 
 
 // Get elements from HTML
+const SUPABASE_URL = "https://hanuvdzlktkdarqraqeq.supabase.co";
+const SUPABASE_KEY = "sb_publishable_qI3OmkMtsDNlTWa9Eb6mUQ_n826kvF5";
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
 
 const purchaseForm = document.getElementById("purchaseForm");
 
