@@ -706,11 +706,6 @@ function escapeHTML(text) {
 
 
 // ==========================================
-// ==========================================
-// LOAD PURCHASES FROM SUPABASE
-// ==========================================
-
-// ==========================================
 // LOAD PURCHASES FROM SUPABASE
 // ==========================================
 
@@ -729,6 +724,7 @@ async function loadPurchases() {
     const { data, error } = await supabaseClient
         .from("expenses")
         .select("*")
+        .eq("user_id", user.id)
         .order("date", { ascending: false });
 
     if (error) {
@@ -757,6 +753,33 @@ async function loadPurchases() {
 
     updateDashboard();
 }
+
+
+// ==========================================
+// CHECK LOGIN
+// ==========================================
+
+async function checkAuth() {
+
+    const {
+        data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (session) {
+
+        showDashboard();
+
+        await loadPurchases();
+
+    } else {
+
+        showAuth();
+
+    }
+
+}
+
+checkAuth();
 
 
 // ==========================================
