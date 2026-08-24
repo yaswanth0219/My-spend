@@ -273,7 +273,14 @@ if (!user) {
     return;
 }
 
-const { error } = await supabaseClient
+const { data: { user } } = await supabaseClient.auth.getUser();
+
+if (!user) {
+    errorMessage.textContent = "You are not logged in.";
+    return;
+}
+
+const { data, error } = await supabaseClient
     .from("expenses")
     .insert({
         user_id: user.id,
@@ -281,13 +288,16 @@ const { error } = await supabaseClient
         amount: amount,
         category: category,
         date: date
-    });
+    })
+    .select();
 
 if (error) {
-    console.error("Save error:", error);
+    console.error("SAVE ERROR:", error);
     errorMessage.textContent = "Failed to save purchase: " + error.message;
     return;
 }
+
+console.log("PURCHASE SAVED:", data);
 
 await loadPurchases();
 
