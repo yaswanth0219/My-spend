@@ -712,6 +712,48 @@ function escapeHTML(text) {
 
 async function loadPurchases() {
 
+    const {
+        data: { user }
+    } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+        purchases = [];
+        updateDashboard();
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .from("expenses")
+        .select("*")
+        .order("date", { ascending: false });
+
+    if (error) {
+
+        console.error("Supabase error:", error);
+
+        errorMessage.textContent =
+            "Could not load purchases.";
+
+        return;
+    }
+
+    purchases = data.map(purchase => ({
+
+        id: purchase.id,
+
+        productName: purchase.title,
+
+        amount: Number(purchase.amount),
+
+        category: purchase.category,
+
+        date: purchase.date
+
+    }));
+
+    updateDashboard();
+}
+
     const { data, error } = await supabaseClient
         .from("expenses")
         .select("*")
